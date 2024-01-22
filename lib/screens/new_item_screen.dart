@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shopping_list/data/categories.dart';
+import 'package:shopping_list/models/category.dart';
 
 class NewItemScreen extends StatefulWidget {
   const NewItemScreen({super.key});
@@ -10,9 +11,14 @@ class NewItemScreen extends StatefulWidget {
 
 class _NewItemScreenState extends State<NewItemScreen> {
   final _formKey = GlobalKey<FormState>();
+  var _enteredName = '';
+  var _enteredQuantity = 1;
+  var _selectedCategory = categories[Categories.vegetables]!;
 
   void _saveItem() {
-    _formKey.currentState!.validate();
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+    }
   }
 
   void _resetItem() {
@@ -45,30 +51,34 @@ class _NewItemScreenState extends State<NewItemScreen> {
                   }
                   return null;
                 },
+                onSaved: (value) => _enteredName = value!,
               ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Expanded(
                     child: TextFormField(
-                        initialValue: '1',
-                        decoration: const InputDecoration(
-                          label: Text('Quantity'),
-                        ),
-                        keyboardType: TextInputType.number,
-                        validator: (value) {
-                          if (value == null ||
-                              value.isEmpty ||
-                              int.tryParse(value) == null ||
-                              int.parse(value) <= 0) {
-                            return 'Must be a valid, positive number.';
-                          }
-                          return null;
-                        }),
+                      initialValue: '1',
+                      decoration: const InputDecoration(
+                        label: Text('Quantity'),
+                      ),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null ||
+                            value.isEmpty ||
+                            int.tryParse(value) == null ||
+                            int.parse(value) <= 0) {
+                          return 'Must be a valid, positive number.';
+                        }
+                        return null;
+                      },
+                      onSaved: (value) => _enteredQuantity = int.parse(value!),
+                    ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: DropdownButtonFormField(
+                      value: _selectedCategory,
                       items: [
                         for (final category in categories.entries)
                           DropdownMenuItem(
@@ -88,7 +98,11 @@ class _NewItemScreenState extends State<NewItemScreen> {
                             ),
                           )
                       ],
-                      onChanged: (value) {},
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedCategory = value!;
+                        });
+                      },
                     ),
                   )
                 ],
